@@ -1,0 +1,47 @@
+---
+title: "Bike Sharing Dataset Analysis by bk"
+author: "bkhanh"
+---
+
+```{r}
+# Load required libraries
+library(lubridate)
+library(dplyr)
+
+# 1. Load the dataset
+data <- read.csv("day.csv")
+
+# Summary of relevant columns
+summary(data[, c("dteday", "temp", "cnt")])
+
+# 2. Convert dteday to date format and extract month names
+data$dteday <- ymd(data$dteday)
+data$month_name <- month(data$dteday, label = TRUE, abbr = FALSE)
+data$month_name <- as.character(data$month_name)  # Convert to character type
+
+# 3. Simple Linear Regression (Model1)
+Model1 <- lm(cnt ~ month_name, data = data)
+summary_Model1 <- summary(Model1)
+
+# 4. Predictions for Model1
+pred_January <- coef(Model1)["(Intercept)"] + coef(Model1)["month_nameJanuary"]
+pred_June <- coef(Model1)["(Intercept)"] + coef(Model1)["month_nameJune"]
+
+# 5. Multiple Linear Regression (Model2)
+Model2 <- lm(cnt ~ temp + month_name, data = data)
+summary_Model2 <- summary(Model2)
+
+# 6. Prediction for Model2 (January when temp = 0.25)
+pred_January_temp <- coef(Model2)["(Intercept)"] + 
+                     coef(Model2)["month_nameJanuary"] + 
+                     coef(Model2)["temp"] * 0.25
+
+# Display all outputs
+list(
+  summary_data = summary(data[, c("dteday", "temp", "cnt")]),
+  Model1_summary = summary_Model1,
+  Model1_pred_January = pred_January,
+  Model1_pred_June = pred_June,
+  Model2_summary = summary_Model2,
+  Model2_pred_January_temp = pred_January_temp
+)
